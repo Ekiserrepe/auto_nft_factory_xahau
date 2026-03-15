@@ -135,7 +135,7 @@ Use `install_hook_nft_factory.js` to reference the already-deployed hook binary 
 The HookHash for the version matching the `nft_factory.c` source in this repository is:
 
 ```
-8B6B79F5E361D97C04ADF75693FFB4E7AF56355FEAD30F8FC1EC86D72EF38818
+D08183D01471EE262EB3776E9AF1D646EEF01E76EEF41D24BE822179D46E461D
 ```
 
 This hash is valid on both **Xahau Testnet** and **Xahau Mainnet**.

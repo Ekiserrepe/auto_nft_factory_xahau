@@ -2,6 +2,9 @@
 
 #define DEBUG 0
 
+// Account-level flag: sender cannot receive incoming Remit transactions
+#define lsfDisallowIncomingRemit 0x40000000UL
+
 #define MAX_URI_LEN     200
 #define MAX_FINAL_URI_LEN 255
 #define MAX_EXT_LEN     16
@@ -147,6 +150,33 @@ int64_t hook(uint32_t reserved)
     BUFFER_EQUAL(equal, hook_acc, otx_acc, 20);
     if (equal)
         accept(SBUF("NFT :: Outgoing or self Payment. Accepting."), __LINE__);
+
+    // ── Check DisallowIncomingRemit flag on sender ────────────────────────────
+    // If the sender has this flag set, a Remit back to them would fail.
+    // Rollback early with a clear error instead of emitting a doomed tx.
+    {
+        uint8_t acc_kl[34];
+        if (util_keylet(SBUF(acc_kl), KEYLET_ACCOUNT, otx_acc, 20, 0, 0, 0, 0) != 34)
+            rollback(SBUF("NFT :: Error :: Could not build account keylet."), __LINE__);
+
+        int64_t kl_slot = slot_set(SBUF(acc_kl), 1);
+        if (kl_slot < 0)
+            rollback(SBUF("NFT :: Error :: Could not load sender account root."), __LINE__);
+
+        if (slot_subfield(kl_slot, sfFlags, 2) < 0)
+            rollback(SBUF("NFT :: Error :: Could not access sender account flags."), __LINE__);
+
+        uint8_t sender_flags_buf[4];
+        if (slot(SBUF(sender_flags_buf), 2) != 4)
+            rollback(SBUF("NFT :: Error :: Could not read sender account flags."), __LINE__);
+
+        uint32_t sender_flags =
+            ((uint32_t)sender_flags_buf[0] << 24) | ((uint32_t)sender_flags_buf[1] << 16) |
+            ((uint32_t)sender_flags_buf[2] <<  8) | ((uint32_t)sender_flags_buf[3]);
+
+        if (sender_flags & lsfDisallowIncomingRemit)
+            rollback(SBUF("NFT :: Error :: Sender has DisallowIncomingRemit flag set."), __LINE__);
+    }
 
     // ── AMOUNT validation ─────────────────────────────────────────────────────
     int64_t required_drops = read_amount_param();
