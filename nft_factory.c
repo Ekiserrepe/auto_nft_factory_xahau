@@ -3,7 +3,7 @@
 #define DEBUG 0
 
 // Account-level flag: sender cannot receive incoming Remit transactions
-#define lsfDisallowIncomingRemit 0x40000000UL
+#define lsfDisallowIncomingRemit 0x80000000UL
 
 #define MAX_URI_LEN     200
 #define MAX_FINAL_URI_LEN 255
