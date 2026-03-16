@@ -2,6 +2,8 @@
 
 A Xahau hook written in C that automatically mints a sequential URIToken NFT in response to an incoming XAH payment. Each NFT receives a unique, zero-padded URI built from a configurable base path, an auto-incremented counter persisted in hook state, and a file extension.
 
+You can try it on [https://nft.xahau.love]()
+
 ---
 
 ## How it works
